@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 郭军伟
+ * @Date: 2020-09-07 09:42:45
+ * @LastEditors: 郭军伟
+ * @LastEditTime: 2020-09-07 14:39:18
+ */
 import { Context } from 'koa';
 import { getManager } from 'typeorm';
 
@@ -8,7 +15,6 @@ export default class UserController {
   public static async listUsers(ctx: Context) {
     const userRepository = getManager().getRepository(User);
     const users = await userRepository.find();
-
     ctx.status = 200;
     ctx.body = users;
   }
@@ -27,26 +33,24 @@ export default class UserController {
 
   public static async updateUser(ctx: Context) {
     const userId = +ctx.params.id;
-
     if (userId !== +ctx.state.user.id) {
       throw new ForbiddenException();
     }
 
     const userRepository = getManager().getRepository(User);
     await userRepository.update(userId, ctx.request.body);
-    const updatedUser = await userRepository.findOne(userId);
+    const updateUser = await userRepository.findOne(userId);
 
-    if (updatedUser) {
+    if (updateUser) {
       ctx.status = 200;
-      ctx.body = updatedUser;
+      ctx.body = updateUser;
     } else {
-      ctx.status = 404;
+      throw new NotFoundException();
     }
   }
 
   public static async deleteUser(ctx: Context) {
     const userId = +ctx.params.id;
-
     if (userId !== +ctx.state.user.id) {
       throw new ForbiddenException();
     }

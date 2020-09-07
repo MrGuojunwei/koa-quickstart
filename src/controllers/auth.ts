@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @Author: 郭军伟
+ * @Date: 2020-09-07 09:40:58
+ * @LastEditors: 郭军伟
+ * @LastEditTime: 2020-09-07 14:37:25
+ */
 import { Context } from 'koa';
 import * as argon2 from 'argon2';
 import { getManager } from 'typeorm';
@@ -28,14 +35,12 @@ export default class AuthController {
   }
 
   public static async register(ctx: Context) {
-    const userRepository = getManager().getRepository(User);
-
     const newUser = new User();
     newUser.name = ctx.request.body.name;
     newUser.email = ctx.request.body.email;
     newUser.password = await argon2.hash(ctx.request.body.password);
 
-    // 保存到数据库
+    const userRepository = getManager().getRepository(User);
     const user = await userRepository.save(newUser);
 
     ctx.status = 201;

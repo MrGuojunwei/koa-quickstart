@@ -3,19 +3,20 @@
  * @Author: 郭军伟
  * @Date: 2020-09-08 18:24:45
  * @LastEditors: 郭军伟
- * @LastEditTime: 2020-09-08 19:14:02
+ * @LastEditTime: 2020-09-09 11:32:00
  */
 import { Context } from 'koa';
 import svgCaptcha from 'svg-captcha';
 import { Session } from 'koa-session';
 
-import { genId } from '../utils/util';
+import { genId, createBody } from '../utils/util';
 import { UnauthorizedException } from '../exceptions';
+import { SUCCESS } from '../constants';
 
 const validity = 5 * 60 * 1000;
 
 class Capture {
-  public static async getCapture(ctx: Context) {
+  public static async getCapture(ctx: Context): Promise<void> {
     const cap = svgCaptcha.create({
       size: 4, // 验证吗长度
       width: 160,
@@ -31,16 +32,23 @@ class Capture {
     const randomKey = genId();
     if (ctx.session) {
       ctx.session[randomKey] = text;
-      ctx.body = {
+      ctx.status = 200;
+      ctx.body = createBody(SUCCESS, {
         capture: img,
         randomKey,
-      };
+      });
       setTimeout(() => {
         delete (ctx.session as Session)[randomKey];
       }, validity);
-      ctx.status = 200;
     } else {
       throw new UnauthorizedException('服务端错误');
+    }
+  }
+
+  public static async getSession(ctx: Context): Promise<void> {
+    if (ctx.session) {
+      ctx.status = 200;
+      ctx.body = createBody(SUCCESS, ctx.session);
     }
   }
 }

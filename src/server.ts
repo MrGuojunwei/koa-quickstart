@@ -3,7 +3,7 @@
  * @Author: 郭军伟
  * @Date: 2020-09-07 09:21:26
  * @LastEditors: 郭军伟
- * @LastEditTime: 2020-09-08 19:16:36
+ * @LastEditTime: 2020-09-09 10:45:49
  */
 import koa from 'koa';
 import cors from '@koa/cors';
@@ -12,8 +12,8 @@ import { createConnection } from 'typeorm';
 import 'reflect-metadata';
 import jwt from 'koa-jwt';
 import koa_session from 'koa-session';
+import logger from 'koa-logger';
 
-import { logger } from './logger';
 import { unprotectedRouter, protectedRouter } from './routes';
 import { JWT_SECRET } from './constants';
 import sessionConfig from './config/session';
@@ -25,8 +25,8 @@ createConnection()
     const session_signed_key = ['appletSystem'];
     const session = koa_session(sessionConfig, app);
     app.keys = session_signed_key;
-    app.use(session);
 
+    app.use(session);
     app.use(logger());
     app.use(cors());
     app.use(bodyParser());
@@ -40,9 +40,7 @@ createConnection()
     });
 
     app.use(unprotectedRouter.routes()).use(unprotectedRouter.allowedMethods());
-
     app.use(jwt({ secret: JWT_SECRET }).unless({ method: 'GET' }));
-
     app.use(protectedRouter.routes()).use(protectedRouter.allowedMethods());
 
     app.listen(3000);
